@@ -31,16 +31,16 @@ interface GetContainerFunc {
   (): HTMLElement;
 }
 
-interface Options {
-  isSuccess: IsSuccessFunc;
-  beforeRequest: HandleRequestIdFunc;
-  afterRequest: HandleRequestIdFunc;
-  onSuccess: HandleResponseFunc;
-  onFail: HandleResponseFunc;
-  confirmText: string;
-  extraData: any;
-  showSpin: boolean;
-  getContainer: GetContainerFunc;
+export interface Options {
+  isSuccess?: IsSuccessFunc;
+  beforeRequest?: HandleRequestIdFunc;
+  afterRequest?: HandleRequestIdFunc;
+  onSuccess?: HandleResponseFunc;
+  onFail?: HandleResponseFunc;
+  confirmText?: string;
+  extraData?: any;
+  showSpin?: boolean;
+  getContainer?: GetContainerFunc;
 }
 
 interface Result {
@@ -49,11 +49,11 @@ interface Result {
   status: number;
 }
 
-function createInstance(axiosConfig: AxiosRequestConfig, defaultOptions: Options) {
+function createInstance(axiosConfig: AxiosRequestConfig, defaultOptions?: Options) {
   const requestIdList: number[] = [];
   const instance = axios.create(axiosConfig);
 
-  return function request(requestConfig: AxiosRequestConfig, customerOptions: Options) {
+  return function request(requestConfig: AxiosRequestConfig, customerOptions?: Options) {
     const {
       isSuccess = () => true,
       beforeRequest = () => { },
@@ -203,4 +203,5 @@ function createInstance(axiosConfig: AxiosRequestConfig, defaultOptions: Options
   };
 }
 
+export { AxiosRequestConfig } from 'axios';
 export default createInstance;
