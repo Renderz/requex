@@ -49,7 +49,7 @@ interface Result {
   status: number;
 }
 
-function createInstance(axiosConfig: AxiosRequestConfig, defaultOptions?: Options) {
+function createInstance(axiosConfig?: AxiosRequestConfig, defaultOptions?: Options) {
   const requestIdList: number[] = [];
   const instance = axios.create(axiosConfig);
 
