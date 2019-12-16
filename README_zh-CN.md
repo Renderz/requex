@@ -2,7 +2,7 @@
 
 # Requex
 
-基于axios封装的http组件, 自带nprogress进度条, 可自定义业务维度错误.
+基于 [axios](https://github.com/axios/axios) 的HTTP 组件,自带 [NProgress](https://github.com/rstacruz/nprogress) 请求中特效. 用于自定义业务级别错误, 简化请求流程.
 
 ## 快速上手
 ```bash
@@ -10,93 +10,109 @@
 $ yarn add requex
 ```
 ```javascript
-// 例子
+// 使用示例
 import createInstance from 'requex';
 
-// 和 axios.create() 相同的使用方法
-const request = createInstance();
-const response = await request({
-    url:'/api/v1',
-    method:'get',
-})
-
-// createInstance()第一个参数和axios.create()的参数相同.
+// [createInstance] 用于创建一个 request 实例.
+// [createInstance] 参数包括 [axios configs] 和 [request options].
+// 参数1 [axios config] 和 axios.create()参数相同, 用于定义全局的axios特性.
 const request = createInstance({
-    withCredentials: true,
-    headers: {
-      Accept: 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-})
-
-// createInstance()第二个参数使用如下
-const request = createInstance({},{
-    // isSucess用于对成功网络返回下的再次判断
-    // 比如定义data.code是"200000"或者"200100"才是业务成功
+  withCredentials: true,
+  headers: {
+    Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+  },
+});
+// 参数2 [request options] 用于定义全局的请求特性, 参数如下
+const request = createInstance(
+  {},
+  {
+    // 一些网络返回码在200-300之间的请求, 可能也需要被视为业务错误请求, [isSuccess] 正是用于定义这些返回类型.
+    // 例如: 只有data.code 等于 '200100' 或者 '200000'的返回才被视为成功/
     isSuccess: data => {
-        const { code } = data;
-        return ['200000', '200100'].includes(code);
+      const { code } = data;
+      return ['200000', '200100'].includes(code);
     },
-    // onSuccess为请求成功后的回调
-    // 比如用某种UI库显示返回的文字
+    // 请求成功的回调.
     onSuccess: data => {
-        const { message } = data;
-        Message.success(message);
+      const { message } = data;
+      Message.success(message);
     },
-    // 和onSuccess相同, 是请求失败后的回调
-    // 如果isSuccess(data) === false的时候, 200-300的返回码也会在onFail中出现
+    // 请求失败的回调
     onFail: (data, status, config) => {
-        if(status === 401){
-            // 对无权限返回做处理
-        } else if(status >= 200 && status < 300) {
-            // 对业务失败做处理
-        } else {
-            // 对其他失败做处理
+      if (status === 401) {
+        // 用于对不同返回码进行错误处理.
+      } else if (status >= 200 && status < 300) {
+      } else {
+      }
+    },
+  },
+);
+
+// [axios configs] 和 [request options] 都可被request实例的私有参数重载.
+const response = await request(
+    {
+    url: '/api/v1',
+    method: 'POST',
+    data: { a: 1, b: 2 },
+    }, 
+    {
+        onSuccess: data => {
+            const { message } = data;
+            AnotherMessage.success(message);
         }
-    }
-})
+    },
+);
 
-// 额外参数
-// extraData优先级低于axios.data, 此时发送{a:1:b:2}
-const request = createInstance({})
-const request = await request({
-    url:'/api/v1',
-    method:'POST',
-    data: {a:1,b:2},
-},{
-    extraData: {c:1,d:2}
-})
+// extraData 和axios.data相同.
+const request = createInstance({});
+const request = await request(
+  {
+    url: '/api/v1',
+    method: 'POST',
+  },
+  {
+    extraData: { c: 1, d: 2 },
+  },
+);
 
-// 当不存在axios.data时, 发送{c:2,d:2}
-const request = createInstance({})
-const request = await request({
-    url:'/api/v1',
-    method:'POST',
-},{
-    extraData: {c:1,d:2}
-})
+// axios.data 比 extraData具有更高的优先级.
+// { a: 1, b: 2 } 将会被发送.
+const request = createInstance({});
+const request = await request(
+  {
+    url: '/api/v1',
+    method: 'POST',
+    data: { a: 1, b: 2 },
+  },
+  {
+    extraData: { c: 1, d: 2 },
+  },
+);
 
-// axios.data或extraData会在url模板拼接
-// 此时请求url为'/api/v1/1/2', 发送{e:3}
-// 注意被拼接的参数会从data中删除
-const request = createInstance({})
-const request = await request({
-    url:'/api/v1/:c/:d',
-    method:'POST',
-},{
-    extraData: {c:1,d:2,e:3}
-})
+// axios.data 和 extraData 都将被用于url的正则匹配.
+// url会被匹配为'/api/v1/1/2'同时将发送{ e: 3 }.
+const request = createInstance({});
+const request = await request(
+  {
+    url: '/api/v1/:c/:d',
+    method: 'POST',
+  },
+  {
+    extraData: { c: 1, d: 2, e: 3 },
+  },
+);
 ```
 
-## 参数文档
-| 参数名 | 类型 | 说明 | 默认值 |
+## Request Options 
+| 参数 | 类型 | 说明 | 默认值 |
 | ---   | --- | ---  | ---   |
-| isSuccess | (data:any): boolean | 用于判断网络请求成功的接口(返回码在200-300之间),是否是业务成功 | () => true
-| beforeRequest | (requestId:number): void | 在请求开始前的回调, 可用于对接UI库开启loading特效 | () => {}
-| afterRequest | (requestId:number): void | 在请求结束后的回调, 可用于对接UI库关闭loading特效 | () => {}
-| onSuccess | (data: any, status: number, config: AxiosRequestConfig): void | 在请求成功时的回调, 可用于对接UI库弹出成功文本等 | () => {}
-| onFail | (data: any, status: number, config: AxiosRequestConfig): void | 在请求失败时的回调, 可用于处理各种错误码, 对接UI库弹出失败文本等 | () => {}
-| confirmText | string | 当后台返回为新页面时, 弹出提示框的文本 | 'Jump to the target page?' 
-| extraData | object | 相当于axios.data, 优先级低于axios.data | {}
-| showSpin | boolean | 是否显示loading动效 | true
-| getContainer | (): HTMLElement | loading动效绑定的组件 | () => document.getElementById('root')
+| isSuccess | (data:any): boolean | 用于定义业务成功的请求. | () => true
+| beforeRequest | (requestId:number): void | 请求开始前的回调. | () => {}
+| afterRequest | (requestId:number): void | 请求完成后的回调. | () => {}
+| onSuccess | (data: any, status: number, config: AxiosRequestConfig): void | 请求成功时的回调. | () => {}
+| onFail | (data: any, status: number, config: AxiosRequestConfig): void | 请求失败时的回调. | () => {}
+| confirmText | string | 当返回类型是新页面时, 会弹出confirm窗口, 提示的内容. | 'Jump to the target page?' 
+| extraData | object | 和axios.data相同, 但具有更低的优先级. | {}
+| showSpin | boolean | 是否显示加载中特效. | true
+| getContainer | (): HTMLElement | 加载中特效挂载的组件. | () => document.getElementById('root')
