@@ -1,6 +1,6 @@
 {
   "name": "requex",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A common http request utility based on axios, nprogress.",
   "main": "dist/index.esm.js",
   "types": "dist/index.d.ts",
