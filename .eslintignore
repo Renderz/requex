@@ -1,0 +1,9 @@
+/lambda/mock/**
+/scripts
+/config
+/example
+_test_
+/node_modules
+/es
+/lib
+/dist

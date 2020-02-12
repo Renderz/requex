@@ -1,6 +1,6 @@
 {
   "name": "requex",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "A common http request utility based on axios, nprogress.",
   "main": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -20,6 +20,7 @@
   "author": "renderz <464816158@qq.com>",
   "license": "MIT",
   "dependencies": {
+    "@umijs/fabric": "^2.0.0",
     "axios": "^0.19.0",
     "downloadjs": "^1.4.7",
     "father": "^2.29.0",
@@ -31,7 +32,8 @@
     "@types/downloadjs": "^1.4.1",
     "@types/lodash": "^4.14.149",
     "@types/nprogress": "^0.2.0",
-    "babel-plugin-import": "^1.13.0"
+    "babel-plugin-import": "^1.13.0",
+    "eslint-plugin-prettier": "^3.1.2"
   },
   "sideEffects": false
 }

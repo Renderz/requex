@@ -31,16 +31,19 @@ interface GetContainerFunc {
   (): HTMLElement;
 }
 
-export interface Options {
+export interface Options extends AxiosRequestConfig {
   isSuccess?: IsSuccessFunc;
+  confirmText?: string;
+  showSpin?: boolean;
+  getContainer?: GetContainerFunc;
+}
+
+export interface ExtraOptions {
   beforeRequest?: HandleRequestIdFunc;
   afterRequest?: HandleRequestIdFunc;
   onSuccess?: HandleResponseFunc;
   onFail?: HandleResponseFunc;
-  confirmText?: string;
   extraData?: any;
-  showSpin?: boolean;
-  getContainer?: GetContainerFunc;
 }
 
 interface Result {
@@ -49,31 +52,35 @@ interface Result {
   status: number;
 }
 
-function createInstance(axiosConfig?: AxiosRequestConfig, defaultOptions?: Options) {
+function createInstance(defaultOptions: Options, defaultExtraOptions: ExtraOptions) {
   const requestIdList: number[] = [];
-  const instance = axios.create(axiosConfig);
 
-  return function request(requestConfig: AxiosRequestConfig, customerOptions?: Options) {
+  const instance = axios.create(defaultOptions);
+
+  return function request(requestOptions: Options, extraOptions: ExtraOptions): Promise<Result> {
     const {
       isSuccess = () => true,
-      beforeRequest = () => { },
-      afterRequest = () => { },
-      onSuccess = () => { },
-      onFail = () => { },
       confirmText = 'Jump to the target page?',
-      extraData = {},
       showSpin = true,
       getContainer = () => document.getElementById('root'),
-    } = { ...defaultOptions, ...customerOptions };
+    } = { ...defaultOptions, ...requestOptions };
+
+    const {
+      beforeRequest = () => {},
+      afterRequest = () => {},
+      onSuccess = () => {},
+      onFail = () => {},
+      extraData = {},
+    } = { ...defaultExtraOptions, ...extraOptions };
 
     // 1. check url contain pattern like '/:param1/:param2'.
     // 2. fill up the certain pattern with the param from data then delete them.
     // 3. idea from : https://github.com/zuiidea/antd-admin/blob/master/src/utils/request.js
 
-    let { url = '' } = requestConfig;
+    let { url = '' } = requestOptions;
 
     let domain = '';
-    let tempData = requestConfig.data || extraData;
+    let tempData = requestOptions.data || extraData;
     const urlMatch = url.match(/[a-zA-z]+:\/\/[^/]*/);
     if (urlMatch) {
       [domain] = urlMatch;
@@ -98,15 +105,15 @@ function createInstance(axiosConfig?: AxiosRequestConfig, defaultOptions?: Optio
 
     url = domain + url;
     // eslint-disable-next-line
-    requestConfig.url = url;
+    requestOptions.url = url;
 
     // extData can be used as [parmas] or [data] of request options depends on [method]
-    if ([undefined, 'get', 'GET'].includes(requestConfig.method)) {
+    if ([undefined, 'get', 'GET'].includes(requestOptions.method)) {
       // eslint-disable-next-line
-      requestConfig.params = tempData;
+      requestOptions.params = tempData;
     } else {
       // eslint-disable-next-line
-      requestConfig.data = tempData;
+      requestOptions.data = tempData;
     }
 
     // show spin and mask
@@ -127,7 +134,7 @@ function createInstance(axiosConfig?: AxiosRequestConfig, defaultOptions?: Optio
     beforeRequest(requestId);
     requestIdList.push(requestId);
 
-    return instance(requestConfig)
+    return instance(requestOptions)
       .then(response => {
         const {
           data,
@@ -167,9 +174,9 @@ function createInstance(axiosConfig?: AxiosRequestConfig, defaultOptions?: Optio
         result.success = success;
 
         if (success) {
-          onSuccess(data, status, requestConfig);
+          onSuccess(data, status, requestOptions);
         } else {
-          onFail(data, status, requestConfig);
+          onFail(data, status, requestOptions);
         }
 
         return Promise.resolve(result);
@@ -183,7 +190,7 @@ function createInstance(axiosConfig?: AxiosRequestConfig, defaultOptions?: Optio
           const { data, status } = response;
           const result: Result = { data, status, success: false };
 
-          onFail(data, status, requestConfig);
+          onFail(data, status, requestOptions);
 
           return Promise.resolve(result);
         }

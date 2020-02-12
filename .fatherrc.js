@@ -1,10 +1,7 @@
 export default {
     entry: 'src/index.ts',
     esm: "rollup",
-    umd: {
-        name: 'requex',
-        minFile: true
-    },
+    cjs: 'rollup',
     extraBabelPlugins: [
         ['babel-plugin-import', {
             "libraryName": "lodash",
