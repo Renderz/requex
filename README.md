@@ -116,7 +116,7 @@ const request = await request(
 | showSpin | boolean | whether show the loading spinner. | true
 | getContainer | (): HTMLElement | Parent node which the loading spinner should be rendered to. | () => document.getElementById('root')
 
-## Request Options 
+## Extra Request Options 
 | Parameter | Type | Description | Default |
 | ---   | --- | ---  | ---   |
 | beforeRequest | (requestId:number): void | a callback function executed before a request. Usually used to open a loading spinner with an UI framework. | () => {}
