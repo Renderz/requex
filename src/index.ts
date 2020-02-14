@@ -6,7 +6,7 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 const style =
-  'display: block;width: 100%;height: 100%;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: absolute;top: 0;left: 0;z-index: 2000;';
+  'display: block;width: 100vw;height: 100wh;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: absolute;top: 0;left: 0;z-index: 2000;';
 
 const template =
   '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner" style="top: 50%;right: 50%"><div class="spinner-icon"></div></div>';
@@ -52,12 +52,12 @@ interface Result {
   status: number;
 }
 
-function createInstance(defaultOptions: Options, defaultExtraOptions: ExtraOptions) {
+function createInstance(defaultOptions: Options, defaultExtraOptions?: ExtraOptions) {
   const requestIdList: number[] = [];
 
   const instance = axios.create(defaultOptions);
 
-  return function request(requestOptions: Options, extraOptions: ExtraOptions): Promise<Result> {
+  return function request(requestOptions: Options, extraOptions?: ExtraOptions): Promise<Result> {
     const {
       isSuccess = () => true,
       confirmText = 'Jump to the target page?',

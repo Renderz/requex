@@ -26,7 +26,6 @@ const request = createInstance({
 
 // The second parameter is the [request options] which is used to configure the global request features.
 const request = createInstance(
-  {},
   {
     // Some kinds of the response should be defined as error even it's network response code is between 200 and 300. [isSuccess] is the certain parameter to defined the response pattern.
     // e.g. Only response which data.code equal to '200000' or '200100' could be treated as successful.
@@ -34,6 +33,8 @@ const request = createInstance(
       const { code } = data;
       return ['200000', '200100'].includes(code);
     },
+  },
+  {
     // The callback function on a success response.
     // Usually used to display a success message with a UI framework.
     onSuccess: data => {
@@ -111,11 +112,15 @@ const request = await request(
 | Parameter | Type | Description | Default |
 | ---   | --- | ---  | ---   |
 | isSuccess | (data:any): boolean | a condition used to define a response as successful response. | () => true
+| confirmText | string | the confirm text when return a new page. | 'Jump to the target page?' 
+| showSpin | boolean | whether show the loading spinner. | true
+| getContainer | (): HTMLElement | Parent node which the loading spinner should be rendered to. | () => document.getElementById('root')
+
+## Request Options 
+| Parameter | Type | Description | Default |
+| ---   | --- | ---  | ---   |
 | beforeRequest | (requestId:number): void | a callback function executed before a request. Usually used to open a loading spinner with an UI framework. | () => {}
 | afterRequest | (requestId:number): void | a callback function executed after a request. Usually used to close a loading spinner with an UI framework. | () => {}
 | onSuccess | (data: any, status: number, config: AxiosRequestConfig): void | a callback function executed on a successful response. Usually used to save response data or display a message with an UI framework. | () => {}
 | onFail | (data: any, status: number, config: AxiosRequestConfig): void | a callback function executed on a error response. Usually used to do error handling or display message with an UI framework. | () => {}
-| confirmText | string | the confirm text when return a new page. | 'Jump to the target page?' 
 | extraData | object | same as axios.data with lower priority. | {}
-| showSpin | boolean | whether show the loading spinner. | true
-| getContainer | (): HTMLElement | Parent node which the loading spinner should be rendered to. | () => document.getElementById('root')

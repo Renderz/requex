@@ -25,7 +25,6 @@ const request = createInstance({
 });
 // 参数2 [request options] 用于定义全局的请求特性, 参数如下
 const request = createInstance(
-  {},
   {
     // 一些网络返回码在200-300之间的请求, 可能也需要被视为业务错误请求, [isSuccess] 正是用于定义这些返回类型.
     // 例如: 只有data.code 等于 '200100' 或者 '200000'的返回才被视为成功/
@@ -33,6 +32,8 @@ const request = createInstance(
       const { code } = data;
       return ['200000', '200100'].includes(code);
     },
+  },
+  {
     // 请求成功的回调.
     onSuccess: data => {
       const { message } = data;
@@ -103,16 +104,20 @@ const request = await request(
   },
 );
 ```
-
 ## Request Options 
 | 参数 | 类型 | 说明 | 默认值 |
 | ---   | --- | ---  | ---   |
 | isSuccess | (data:any): boolean | 用于定义业务成功的请求. | () => true
+| confirmText | string | 当返回类型是新页面时, 会弹出confirm窗口, 提示的内容. | 'Jump to the target page?' 
+| showSpin | boolean | 是否显示加载中特效. | true
+| getContainer | (): HTMLElement | 加载中特效挂载的组件. | () => document.getElementById('root')
+
+
+## Extra Request Options 
+| 参数 | 类型 | 说明 | 默认值 |
+| ---   | --- | ---  | ---   |
 | beforeRequest | (requestId:number): void | 请求开始前的回调. | () => {}
 | afterRequest | (requestId:number): void | 请求完成后的回调. | () => {}
 | onSuccess | (data: any, status: number, config: AxiosRequestConfig): void | 请求成功时的回调. | () => {}
 | onFail | (data: any, status: number, config: AxiosRequestConfig): void | 请求失败时的回调. | () => {}
-| confirmText | string | 当返回类型是新页面时, 会弹出confirm窗口, 提示的内容. | 'Jump to the target page?' 
 | extraData | object | 和axios.data相同, 但具有更低的优先级. | {}
-| showSpin | boolean | 是否显示加载中特效. | true
-| getContainer | (): HTMLElement | 加载中特效挂载的组件. | () => document.getElementById('root')
