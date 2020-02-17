@@ -15,49 +15,52 @@ NProgress.configure({
   template,
 });
 
-interface IsSuccessFunc {
-  (data: any): boolean;
+interface IsSuccessFunc<Req> {
+  (data: Req): boolean;
 }
 
 interface HandleRequestIdFunc {
   (requestId: number): void;
 }
 
-interface HandleResponseFunc {
-  (data: any, status: number, config: AxiosRequestConfig): void;
+interface HandleResponseFunc<Req> {
+  (data: Req, status: number, config: AxiosRequestConfig): void;
 }
 
 interface GetContainerFunc {
   (): HTMLElement;
 }
 
-export interface Options extends AxiosRequestConfig {
-  isSuccess?: IsSuccessFunc;
+export interface Options<Req> extends AxiosRequestConfig {
+  isSuccess?: IsSuccessFunc<Req>;
   confirmText?: string;
   showSpin?: boolean;
   getContainer?: GetContainerFunc;
 }
 
-export interface ExtraOptions {
+export interface ExtraOptions<Req> {
   beforeRequest?: HandleRequestIdFunc;
   afterRequest?: HandleRequestIdFunc;
-  onSuccess?: HandleResponseFunc;
-  onFail?: HandleResponseFunc;
+  onSuccess?: HandleResponseFunc<Req>;
+  onFail?: HandleResponseFunc<Req>;
   extraData?: any;
 }
 
-interface Result {
-  data: any;
+interface Result<Res> {
+  data: Res;
   success: boolean;
   status: number;
 }
 
-function createInstance(defaultOptions: Options, defaultExtraOptions?: ExtraOptions) {
+function createInstance(defaultOptions: Options<any>, defaultExtraOptions?: ExtraOptions<any>) {
   const requestIdList: number[] = [];
 
   const instance = axios.create(defaultOptions);
 
-  return function request(requestOptions: Options, extraOptions?: ExtraOptions): Promise<Result> {
+  return function request<Req, Res>(
+    requestOptions: Options<Req>,
+    extraOptions?: ExtraOptions<Req>,
+  ): Promise<Result<Res>> {
     const {
       isSuccess = () => true,
       confirmText = 'Jump to the target page?',
@@ -143,7 +146,7 @@ function createInstance(defaultOptions: Options, defaultExtraOptions?: ExtraOpti
           request: { responseURL },
         } = response;
 
-        const result: Result = { data, status, success: false };
+        const result: Result<Res> = { data, status, success: false };
 
         const isAttachment: boolean =
           (headers['content-disposition'] || '').indexOf('attachment') >= 0;
@@ -188,7 +191,7 @@ function createInstance(defaultOptions: Options, defaultExtraOptions?: ExtraOpti
           throw error;
         } else {
           const { data, status } = response;
-          const result: Result = { data, status, success: false };
+          const result: Result<Res> = { data, status, success: false };
 
           onFail(data, status, requestOptions);
 
