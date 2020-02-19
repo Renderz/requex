@@ -6,7 +6,7 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 const style =
-  'display: block;width: 100vw;height: 100wh;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: absolute;top: 0;left: 0;z-index: 2000;';
+  'display: block;width: 100vw;height: 100vh;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: absolute;top: 0;left: 0;z-index: 2000;';
 
 const template =
   '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner" style="top: 50%;right: 50%"><div class="spinner-icon"></div></div>';
@@ -15,52 +15,55 @@ NProgress.configure({
   template,
 });
 
-interface IsSuccessFunc<Req> {
-  (data: Req): boolean;
+interface IsSuccessFunc<R> {
+  (data: R): boolean;
 }
 
 interface HandleRequestIdFunc {
   (requestId: number): void;
 }
 
-interface HandleResponseFunc<Req> {
-  (data: Req, status: number, config: AxiosRequestConfig): void;
+interface HandleResponseFunc<R> {
+  (data: R, status: number, config: AxiosRequestConfig): void;
 }
 
 interface GetContainerFunc {
   (): HTMLElement;
 }
 
-export interface Options<Req> extends AxiosRequestConfig {
-  isSuccess?: IsSuccessFunc<Req>;
+export interface Options<R extends object = any> extends AxiosRequestConfig {
+  isSuccess?: IsSuccessFunc<R>;
   confirmText?: string;
   showSpin?: boolean;
   getContainer?: GetContainerFunc;
 }
 
-export interface ExtraOptions<Req> {
+export interface ExtraOptions<R extends object = any> {
   beforeRequest?: HandleRequestIdFunc;
   afterRequest?: HandleRequestIdFunc;
-  onSuccess?: HandleResponseFunc<Req>;
-  onFail?: HandleResponseFunc<Req>;
+  onSuccess?: HandleResponseFunc<R>;
+  onFail?: HandleResponseFunc<R>;
   extraData?: any;
 }
 
-interface Result<Res> {
-  data: Res;
+interface Result<R> {
+  data: R;
   success: boolean;
   status: number;
 }
 
-function createInstance(defaultOptions: Options<any>, defaultExtraOptions?: ExtraOptions<any>) {
+function createInstance<R extends object = any>(
+  defaultOptions: Options<R>,
+  defaultExtraOptions?: ExtraOptions<R>,
+) {
   const requestIdList: number[] = [];
 
   const instance = axios.create(defaultOptions);
 
-  return function request<Req, Res>(
-    requestOptions: Options<Req>,
-    extraOptions?: ExtraOptions<Req>,
-  ): Promise<Result<Res>> {
+  return function request<R extends object = any>(
+    requestOptions: Options<R>,
+    extraOptions?: ExtraOptions<R>,
+  ): Promise<Result<R>> {
     const {
       isSuccess = () => true,
       confirmText = 'Jump to the target page?',
@@ -146,7 +149,7 @@ function createInstance(defaultOptions: Options<any>, defaultExtraOptions?: Extr
           request: { responseURL },
         } = response;
 
-        const result: Result<Res> = { data, status, success: false };
+        const result: Result<R> = { data, status, success: false };
 
         const isAttachment: boolean =
           (headers['content-disposition'] || '').indexOf('attachment') >= 0;
@@ -191,7 +194,7 @@ function createInstance(defaultOptions: Options<any>, defaultExtraOptions?: Extr
           throw error;
         } else {
           const { data, status } = response;
-          const result: Result<Res> = { data, status, success: false };
+          const result: Result<R> = { data, status, success: false };
 
           onFail(data, status, requestOptions);
 
