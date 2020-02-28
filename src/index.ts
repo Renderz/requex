@@ -57,6 +57,7 @@ function createInstance<R extends object = any>(
   defaultExtraOptions?: ExtraOptions<R>,
 ) {
   const requestIdList: number[] = [];
+  let mask: HTMLElement;
 
   const instance = axios.create(defaultOptions);
 
@@ -87,6 +88,7 @@ function createInstance<R extends object = any>(
 
     let domain = '';
     let tempData = requestOptions.data || extraData;
+
     const urlMatch = url.match(/[a-zA-z]+:\/\/[^/]*/);
     if (urlMatch) {
       [domain] = urlMatch;
@@ -110,20 +112,17 @@ function createInstance<R extends object = any>(
     }
 
     url = domain + url;
-    // eslint-disable-next-line
-    requestOptions.url = url;
+
+    const mergedRequestOptions = { ...requestOptions, url };
 
     // extData can be used as [parmas] or [data] of request options depends on [method]
     if ([undefined, 'get', 'GET'].includes(requestOptions.method)) {
-      // eslint-disable-next-line
-      requestOptions.params = tempData;
+      mergedRequestOptions.params = tempData;
     } else {
-      // eslint-disable-next-line
-      requestOptions.data = tempData;
+      mergedRequestOptions.data = tempData;
     }
 
     // show spin and mask
-    let mask: HTMLElement;
     const container: HTMLElement = getContainer() || document.body;
 
     if (showSpin && requestIdList.length === 0) {
@@ -140,7 +139,7 @@ function createInstance<R extends object = any>(
     beforeRequest(requestId);
     requestIdList.push(requestId);
 
-    return instance(requestOptions)
+    return instance(mergedRequestOptions)
       .then(response => {
         const {
           data,
@@ -209,6 +208,7 @@ function createInstance<R extends object = any>(
 
         if (showSpin && requestIdList.length === 0) {
           NProgress.done();
+
           container.removeChild(mask);
         }
         afterRequest(requestId);
