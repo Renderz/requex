@@ -36,6 +36,7 @@ export interface Options<R extends object = any> extends AxiosRequestConfig {
   confirmText?: string;
   showSpin?: boolean;
   getContainer?: GetContainerFunc;
+  blockDownload?: boolean;
 }
 
 export interface ExtraOptions<R extends object = any> {
@@ -70,6 +71,7 @@ function createInstance<R extends object = any>(
       confirmText = 'Jump to the target page?',
       showSpin = true,
       getContainer = () => document.getElementById('root'),
+      blockDownload = false,
     } = { ...defaultOptions, ...requestOptions };
 
     const {
@@ -155,13 +157,18 @@ function createInstance<R extends object = any>(
         const isNewHtml: boolean = (headers['content-type'] || '').indexOf('text/html') >= 0;
 
         if (isAttachment) {
-          const filename = headers['content-disposition'].split('filename=')[1];
+          result.status = 200;
+          result.success = true;
+
+          if (blockDownload) {
+            return result;
+          }
+
+          const filename = decodeURIComponent(headers['content-disposition'].split('filename=')[1]);
           const contentType = headers['content-type'];
 
           download(data, filename, contentType);
 
-          result.status = 200;
-          result.success = true;
           return result;
         }
         if (isNewHtml) {
