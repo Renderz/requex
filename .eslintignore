@@ -7,3 +7,4 @@ _test_
 /es
 /lib
 /dist
+.eslintrc.js
