@@ -7,7 +7,7 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 const style =
-  'display: block;width: 100%;height: 100%;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: absolute;top: 0;left: 0;z-index: 2000;';
+  'display: block;width: 100%;height: 100%;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: fixed;top: 0;left: 0;z-index: 2000;';
 
 const template =
   '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner" style="top: 50%;right: 50%"><div class="spinner-icon"></div></div>';
@@ -17,7 +17,7 @@ NProgress.configure({
 });
 
 interface ResponseCallbackFn<R> {
-  (response: R, status: number): void;
+  (response: R, status: number, config: AxiosRequestConfig): void;
 }
 
 /**
@@ -71,7 +71,7 @@ function createInstance<R extends unknown = any>(
 
   const instance = axios.create(defaultOptions);
 
-  return function request<TR extends unknown = R, TD extends unknown = any>(
+  return function request<TD extends unknown = any, TR extends unknown = R>(
     options: Options<TR & R>,
     params?: Params<TR & R, TD>,
   ): Promise<Result<TR & R>> {
@@ -157,9 +157,9 @@ function createInstance<R extends unknown = any>(
         result.success = success;
 
         if (success) {
-          onSuccess(data, status);
+          onSuccess(data, status, mergedRequestOptions);
         } else {
-          onFail(data, status);
+          onFail(data, status, mergedRequestOptions);
         }
 
         return Promise.resolve(result);
@@ -173,7 +173,7 @@ function createInstance<R extends unknown = any>(
           const { data, status } = response;
           const result: Result<TR & R> = { data, status, success: false };
 
-          onFail(data, status);
+          onFail(data, status, mergedRequestOptions);
 
           return Promise.resolve(result);
         }
