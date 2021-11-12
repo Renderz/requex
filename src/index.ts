@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig, AxiosInstance } from 'axios';
 import axios from 'axios';
 import { cloneDeep } from 'lodash';
 import { parse, compile } from 'path-to-regexp';
@@ -65,11 +65,16 @@ interface Result<R> {
 function createInstance<R extends unknown = any>(
   defaultOptions: DefaultOptions<R>,
   defaultParams?: DefaultParams<R>,
+  customizeInstance?: (instance: AxiosInstance) => void,
 ) {
   const requestIdList: number[] = [];
   let mask: HTMLElement;
 
   const instance = axios.create(defaultOptions);
+
+  if (customizeInstance) {
+    customizeInstance(instance);
+  }
 
   return function request<TD extends unknown = any, TR extends unknown = R>(
     options: Options<TR & R>,

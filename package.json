@@ -35,7 +35,18 @@
     "@umijs/fabric": "^2.8.1",
     "babel-plugin-import": "^1.13.3",
     "father": "^2.30.10",
+    "husky": "^7.0.4",
+    "lint-staged": "^11.2.6",
     "prettier": "^2.4.1"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "lint-staged": {
+    "src/*.ts": [
+      "npm run lint:js",
+      "prettier --write"
+    ]
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  }
 }
