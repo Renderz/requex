@@ -13,7 +13,8 @@
   "scripts": {
     "build": "father build",
     "lint:js": "eslint --cache --ext .ts --format=pretty ./src",
-    "lint:prettier": "prettier -c --write \"src/*\" --end-of-line auto"
+    "lint:prettier": "prettier -c --write \"src/*\" --end-of-line auto",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -46,7 +47,9 @@
       "prettier --write"
     ]
   },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
