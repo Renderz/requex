@@ -2,20 +2,23 @@
 
 # Requex
 
-基于 [axios](https://github.com/axios/axios) 的HTTP 组件,自带 [NProgress](https://github.com/rstacruz/nprogress) 请求中特效. 用于自定义业务级别错误, 简化请求流程.
+基于 [axios](https://github.com/axios/axios) 的 HTTP 组件,自带 [NProgress](https://github.com/rstacruz/nprogress) 请求中特效. 用于自定义业务级别错误, 简化请求流程.
 
 ## 快速上手
+
 ```bash
 # 安装
 $ yarn add requex
 ```
-```javascript
+
+```typescript
 // 使用示例
 import createInstance from 'requex';
 
-// [createInstance] 用于创建一个 request 实例.
-// [createInstance] 参数包括 [axios configs] 和 [request options].
-// 参数1 [axios config] 和 axios.create()参数相同, 用于定义全局的axios特性.
+// [createInstance] 用于创建一个 axios 实例.
+// [createInstance] 参数包括 [axios options] 和 [request params].
+
+// 使用场景1，直接生成一个axios实例，参数和axios相同。
 const request = createInstance({
   withCredentials: true,
   headers: {
@@ -23,46 +26,50 @@ const request = createInstance({
     'X-Requested-With': 'XMLHttpRequest',
   },
 });
-// 参数2 [request options] 用于定义全局的请求特性, 参数如下
-const request = createInstance(
+
+// 使用场景2，增加请求成功与失败回调。
+const request = createInstance<{ message?: string; code?: string }>(
   {
-    // 一些网络返回码在200-300之间的请求, 可能也需要被视为业务错误请求, [isSuccess] 正是用于定义这些返回类型.
-    // 例如: 只有data.code 等于 '200100' 或者 '200000'的返回才被视为成功/
-    isSuccess: data => {
-      const { code } = data;
-      return ['200000', '200100'].includes(code);
+    // 一些网络返回码在200-300之间的请求, 可能也需要被视为业务错误请求, [isBizSuccess] 正是用于定义这些返回类型.
+    // 例如: 只有data.code 等于 '200100' 或者 '200000'的返回才被视为成功
+    isBizSuccess: (response) => {
+      const { code } = response;
+      return code ? ['200000', '200100'].includes(code) : false;
     },
   },
   {
     // 请求成功的回调.
-    onSuccess: data => {
-      const { message } = data;
+    onSuccess: (response) => {
+      const { message } = response;
       Message.success(message);
     },
     // 请求失败的回调
-    onFail: (data, status, config) => {
+    onFail: (response, status, config) => {
+      // 用于对不同返回码进行错误处理.
       if (status === 401) {
-        // 用于对不同返回码进行错误处理.
+        console.log('redirect', response);
       } else if (status >= 200 && status < 300) {
+        console.log('error', response);
       } else {
+        console.log('other', response);
       }
     },
   },
 );
 
-// [axios configs] 和 [request options] 都可被request实例的私有参数重载.
+// [axios options] 和 [request params] 都可被request实例的私有参数重载.
 const response = await request(
-    {
+  {
     url: '/api/v1',
     method: 'POST',
     data: { a: 1, b: 2 },
-    }, 
-    {
-        onSuccess: data => {
-            const { message } = data;
-            AnotherMessage.success(message);
-        }
+  },
+  {
+    onSuccess: (response) => {
+      const { message } = response;
+      AnotherMessage.success(message);
     },
+  },
 );
 
 // extraData 和axios.data相同.
@@ -104,20 +111,19 @@ const request = await request(
   },
 );
 ```
-## Request Options 
-| 参数 | 类型 | 说明 | 默认值 |
-| ---   | --- | ---  | ---   |
-| isSuccess | (data:any): boolean | 用于定义业务成功的请求. | () => true
-| confirmText | string | 当返回类型是新页面时, 会弹出confirm窗口, 提示的内容. | 'Jump to the target page?' 
-| showSpin | boolean | 是否显示加载中特效. | true
-| getContainer | (): HTMLElement | 加载中特效挂载的组件. | () => document.getElementById('root')
 
+## Request Options
 
-## Extra Request Options 
 | 参数 | 类型 | 说明 | 默认值 |
-| ---   | --- | ---  | ---   |
-| beforeRequest | (requestId:number): void | 请求开始前的回调. | () => {}
-| afterRequest | (requestId:number): void | 请求完成后的回调. | () => {}
-| onSuccess | (data: any, status: number, config: AxiosRequestConfig): void | 请求成功时的回调. | () => {}
-| onFail | (data: any, status: number, config: AxiosRequestConfig): void | 请求失败时的回调. | () => {}
-| extraData | object | 和axios.data相同, 但具有更低的优先级. | {}
+| --- | --- | --- | --- |
+| isSuccess | (data:any): boolean | 用于定义业务成功的请求. | () => true |
+| showSpin | boolean | 是否显示加载中特效. | true |
+| getContainer | (): HTMLElement | 加载中特效挂载的组件. | () => document.getElementById('root') |
+
+## Extra Request Options
+
+| 参数 | 类型 | 说明 | 默认值 |
+| --- | --- | --- | --- |
+| onSuccess | (data: any, status: number, config: AxiosRequestConfig): void | 请求成功时的回调. | () => {} |
+| onFail | (data: any, status: number, config: AxiosRequestConfig): void | 请求失败时的回调. | () => {} |
+| extraData | object | 和 axios.data 相同, 但具有更低的优先级. | {} |

@@ -1,8 +1,9 @@
 {
   "name": "requex",
-  "version": "1.1.8",
+  "version": "2.0.0",
   "description": "A common http request utility based on axios, nprogress.",
-  "main": "dist/index.esm.js",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "keywords": [
     "request",
@@ -11,7 +12,10 @@
     "nprogress"
   ],
   "scripts": {
-    "build": "father build"
+    "build": "father build",
+    "lint:js": "eslint --cache --ext .ts --format=pretty ./src",
+    "lint:prettier": "prettier -c --write \"src/*\" --end-of-line auto",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -20,21 +24,33 @@
   "author": "renderz <464816158@qq.com>",
   "license": "MIT",
   "dependencies": {
-    "@umijs/fabric": "^2.0.0",
-    "axios": "^0.19.0",
+    "axios": "^0.24.0",
     "downloadjs": "^1.4.7",
-    "father": "^2.29.0",
-    "js-file-download": "^0.4.12",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "nprogress": "^0.2.0",
-    "path-to-regexp": "^6.1.0"
+    "path-to-regexp": "^6.2.0"
   },
   "devDependencies": {
-    "@types/downloadjs": "^1.4.1",
-    "@types/lodash": "^4.14.149",
+    "@types/downloadjs": "^1.4.2",
+    "@types/lodash": "^4.14.176",
     "@types/nprogress": "^0.2.0",
-    "babel-plugin-import": "^1.13.0",
-    "eslint-plugin-prettier": "^3.1.2"
+    "@umijs/fabric": "^2.8.1",
+    "babel-plugin-import": "^1.13.3",
+    "father": "^2.30.10",
+    "husky": "^7.0.4",
+    "lint-staged": "^11.2.6",
+    "prettier": "^2.4.1"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "lint-staged": {
+    "src/*.ts": [
+      "npm run lint:js",
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
 }
