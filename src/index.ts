@@ -188,7 +188,7 @@ function createInstance<R extends unknown = any>(
           requestIdList.findIndex((v) => v === requestId),
           1,
         );
-        if (requestIdList.length === 0) {
+        if (requestIdList.length === 0 && mask !== undefined) {
           NProgress.done();
           container.removeChild(mask);
         }
