@@ -214,7 +214,7 @@ function createInstance<R extends object = any>(
           1,
         );
 
-        if (requestIdList.length === 0) {
+        if (requestIdList.length === 0 && mask !== undefined) {
           NProgress.done();
 
           container.removeChild(mask);
