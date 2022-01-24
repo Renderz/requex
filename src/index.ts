@@ -1,4 +1,5 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import { cloneDeep } from 'lodash';
 import { parse, compile } from 'path-to-regexp';
 import download from 'downloadjs';
@@ -6,7 +7,7 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 const style =
-  'display: block;width: 100vw;height: 100vh;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: absolute;top: 0;left: 0;z-index: 2000;';
+  'display: block;width: 100%;height: 100%;opacity: 0.4;filter: alpha(opacity=40);background: #FFF;position: fixed;top: 0;left: 0;z-index: 2000;';
 
 const template =
   '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner" style="top: 50%;right: 50%"><div class="spinner-icon"></div></div>';
@@ -213,7 +214,7 @@ function createInstance<R extends object = any>(
           1,
         );
 
-        if (showSpin && requestIdList.length === 0) {
+        if (requestIdList.length === 0) {
           NProgress.done();
 
           container.removeChild(mask);
