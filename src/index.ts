@@ -22,11 +22,11 @@ interface ResponseCallbackFn<R> {
 
 /**
  * 基于Axios拓展的“请求配置”
- * @param isBizSuccess  判断是否是业务成功
+ * @param isSuccess  判断是否是业务成功
  * @param showSpin 是否显示"加载中"动态
  */
 export interface Options<R extends unknown = any> extends AxiosRequestConfig {
-  isBizSuccess?: (response: R) => boolean;
+  isSuccess?: (response: R) => boolean;
   showSpin?: boolean;
 }
 
@@ -81,7 +81,7 @@ function createInstance<R extends unknown = any>(
     params?: Params<TR & R, TD>,
   ): Promise<Result<TR & R>> {
     const {
-      isBizSuccess = () => true,
+      isSuccess = () => true,
       showSpin = true,
       getContainer = () => document.getElementById('root'),
     } = { ...defaultOptions, ...options };
@@ -158,7 +158,7 @@ function createInstance<R extends unknown = any>(
           return result;
         }
 
-        const success = isBizSuccess(data);
+        const success = isSuccess(data);
         result.success = success;
 
         if (success) {
