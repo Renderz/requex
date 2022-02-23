@@ -217,7 +217,11 @@ function createInstance<R extends object = any>(
         if (requestIdList.length === 0 && mask !== undefined) {
           NProgress.done();
 
-          container.removeChild(mask);
+          try {
+            container.removeChild(mask);
+          } catch (e) {
+            
+          }
         }
         afterRequest(requestId);
       });
