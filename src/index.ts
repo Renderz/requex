@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { cloneDeep } from 'lodash';
 import { parse, compile } from 'path-to-regexp';
@@ -57,11 +57,16 @@ interface Result<R> {
 function createInstance<R extends object = any>(
   defaultOptions: Options<R>,
   defaultExtraOptions?: ExtraOptions<R>,
+  customizeInstance?: (instance: AxiosInstance) => void,
 ) {
   const requestIdList: number[] = [];
   let mask: HTMLElement;
 
   const instance = axios.create(defaultOptions);
+
+  if (customizeInstance) {
+    customizeInstance(instance);
+  }
 
   return function request<R extends object = any>(
     requestOptions: Options<R>,
@@ -105,7 +110,7 @@ function createInstance<R extends object = any>(
     if (match.length > 1) {
       const cloneData = cloneDeep(tempData);
 
-      match.forEach(item => {
+      match.forEach((item) => {
         if (item instanceof Object && item.name in cloneData) {
           delete cloneData[item.name];
         }
@@ -143,7 +148,7 @@ function createInstance<R extends object = any>(
     requestIdList.push(requestId);
 
     return instance(mergedRequestOptions)
-      .then(response => {
+      .then((response) => {
         const {
           data,
           status,
@@ -194,7 +199,7 @@ function createInstance<R extends object = any>(
 
         return Promise.resolve(result);
       })
-      .catch(error => {
+      .catch((error) => {
         const { response } = error;
 
         if (!response) {
@@ -210,7 +215,7 @@ function createInstance<R extends object = any>(
       })
       .finally(() => {
         requestIdList.splice(
-          requestIdList.findIndex(v => v === requestId),
+          requestIdList.findIndex((v) => v === requestId),
           1,
         );
 
@@ -219,9 +224,7 @@ function createInstance<R extends object = any>(
 
           try {
             container.removeChild(mask);
-          } catch (e) {
-            
-          }
+          } catch (e) {}
         }
         afterRequest(requestId);
       });
